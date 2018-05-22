@@ -36,12 +36,15 @@ int		create_server(int port)
 
 int		main(int argc, char **argv)
 {
-	int				server_fd;
-	int				client_fd;
+	int					server_fd;
+	int					client_fd;
 	struct sockaddr_in	client;
-	unsigned int	client_len;
-	int		data_len;
-	char	data[MAX_DATA];
+	unsigned int		client_len;
+	int					data_len;
+	char				data[MAX_DATA];
+	int					fd;
+	int					len;
+	char				buf[MAX_DATA];
 
 	argc--;
 	argv++;
@@ -51,15 +54,32 @@ int		main(int argc, char **argv)
 		exit(ERROR);
 	while ((client_fd = accept(server_fd, (struct sockaddr *)&client, &client_len)) > ERROR)
 	{
-		printf("NEW CLIENT port [%d] IP [%s]\n", ntohs(client.sin_port), inet_ntoa(client.sin_addr));
+		printf("New client connected on port [%d] and IP [%s]\n", ntohs(client.sin_port), inet_ntoa(client.sin_addr));
+		send(client_fd, "You are connected!\n", 19, 0);
+		while ((data_len = recv(client_fd, data, MAX_DATA - 1, 0)) > 0)
+		{
+			data[data_len] = '\0';
+			printf("RECIEVE [%s]\n", data);
+			send(client_fd, "ok\n", 2, 0);
+		}
+		/*fd = open("file_server.txt", O_RDWR | O_CREAT | O_TRUNC | O_APPEND, 0644);
+		if (fd == ERROR)
+		{
+			printf("fd %d\n", fd);
+			perror("open server");
+			exit(ERROR);
+		}
 		while ((data_len = recv(client_fd, data, MAX_DATA, 0)) > 0)
 		{
-			send(client_fd, data, data_len, 0);
 			data[data_len] = '\0';
-			printf("SENT data : %s\n", data);
+			printf("SENT data [%d] : %s\n", data_len, data);
+			write(fd, data, data_len);
+			//send(client_fd, data, data_len, 0);
+			//printf("SENT data : %s\n", data);
 		}
+		close(fd);
 		if (data_len == ERROR)
-			exit(ERROR);
+			exit(ERROR);*/
 		printf("CLIENT DISCONNECTED!\n");
 		close(client_fd);
 	}
